@@ -57,3 +57,22 @@ Dataset dibagi menjadi dua bagian. Train set berisi gambar beserta label asal da
 - **train.csv** - berisi dua kolom yaitu **image\_id** (nama file gambar pada folder train/) dan **label** (kelas aksara daerah asal gambar tersebut)
 - **test.csv** - berisi kolom **image\_id** (nama file gambar pada folder test/)
 - **sample\_submission.csv** - berisi format pengumpulan yang harus diikuti peserta dengan kolom **image\_id** dan **label**
+
+# Rules
+
+1. Kompetisi ini terbuka untuk tim yang telah terdaftar resmi melalui mekanisme pendaftaran INFEST XII 2026.
+2. Setiap tim hanya diperbolehkan memiliki satu akun Kaggle yang aktif selama kompetisi berlangsung. Akun yang digunakan harus sesuai dengan email yang didaftarkan saat pendaftaran. Apabila terdapat perbedaan, peserta wajib melakukan konfirmasi dan revisi kepada Contact Person yang tertera, paling lambat H+2 setelah perilisan dataset.
+3. Peserta wajib menggunakan bahasa pemrograman Python dalam pengerjaan solusi.
+4. Peserta hanya diperbolehkan menggunakan dataset yang disediakan oleh panitia. Penggunaan data eksternal dari sumber manapun dalam bentuk apapun tidak diperbolehkan.
+5. Peserta diperbolehkan menggunakan pretrained model sebagai base model dengan melakukan fine-tuning pada dataset yang disediakan.
+6. Peserta tidak diperbolehkan menggunakan Large Language Model (LLM), model Generative AI, serta platform AutoML dalam bentuk apapun untuk menghasilkan prediksi. Penggunaan model tersebut sebagai referensi atau studi literatur diperbolehkan.
+7. Peserta dilarang menggunakan teknik apa pun yang memanfaatkan prediksi dari model terhadap data tanpa label sebagai label tambahan untuk melatih ulang model, mencakup namun tidak terbatas pada pseudo labeling, self-training, label propagation, atau teknik semi-supervised learning sejenis lainnya. Model wajib dilatih hanya menggunakan data berlabel yang telah disediakan panitia pada split train, dan panitia akan melakukan pemeriksaan menyeluruh terhadap notebook untuk memastikan tidak ada penggunaan label dari sumber manapun selain train set yang disediakan dalam proses training. Pelanggaran terhadap aturan ini dapat berakibat pada diskualifikasi tim.
+8. Peserta dapat melakukan submission maksimal 3 kali per hari. Sistem akan mengambil 3 submission terbaik sebagai dasar penilaian akhir.
+9. Leaderboard selama kompetisi berlangsung menggunakan Public Score. Penentuan peringkat akhir menggunakan Private Score.
+10. Hasil prediksi yang dikumpulkan harus merupakan output langsung dari model, bukan hasil pengisian manual. Pelanggaran terhadap ketentuan ini akan berakibat diskualifikasi.
+11. Selain submission Kaggle, peserta wajib mengumpulkan notebook dalam format `.ipynb` melalui platform yang disediakan panitia paling lambat 26 September 2026. Peserta yang tidak mengumpulkan notebook akan dianggap gugur.
+12. Notebook yang dikumpulkan harus sudah dijalankan seluruhnya tanpa error, menghasilkan output yang konsisten, dan disertai penjelasan menggunakan komponen markdown pada setiap tahapannya. Penjelasan dalam markdown wajib menggunakan bahasa Indonesia yang baik dan semi-formal.
+13. Format penamaan Notebook adalah **NamaTim\_AsalUniversitas.ipynb**
+14. Dilarang melakukan kerja sama, berbagi file notebook, maupun bertukar hasil prediksi dengan tim lain selama kompetisi berlangsung.
+15. Apabila ditemukan indikasi plagiarisme, kerja sama antar tim, atau ketidaksesuaian signifikan antara submission Kaggle dan notebook yang dikumpulkan, panitia berhak melakukan investigasi dan mendiskualifikasi tim terkait.
+16. Dataset yang disediakan hanya boleh digunakan untuk keperluan kompetisi, tidak diperkenankan untuk disebarluaskan atau digunakan untuk tujuan lain di luar kompetisi.
