@@ -1,0 +1,22 @@
+{
+  "baseline_public_lb_reference": 0.96082,
+  "main_oof_macro_f1": 0.9861098225576945,
+  "v3_oof_macro_f1": 0.990647289721004,
+  "oof_gain": 0.004537467163309494,
+  "main_trio_class_macro_f1": 0.9717411515253621,
+  "v3_trio_class_macro_f1": 0.9828359083890561,
+  "selected_alpha": 1.0,
+  "positive_folds": 5,
+  "main_trio_fold_std": 0.004676813379894094,
+  "v3_trio_fold_std": 0.007387630388149134,
+  "test_prediction_changes": 19,
+  "gates": {
+    "alpha_nonzero": true,
+    "oof_at_least_0_9860": true,
+    "positive_at_least_4_of_5_folds": true,
+    "trio_f1_improves": true
+  },
+  "recommend_submit_v3": true,
+  "recommended_file_if_true": "/workspace/infest_v3_trio_specialist/submission_v3_candidate.csv",
+  "fallback_reference_file": "/workspace/infest_v3_trio_specialist/submission_v1_rebuilt.csv"
+}

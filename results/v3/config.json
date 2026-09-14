@@ -1,0 +1,61 @@
+{
+  "version": "v3_conditional_trio_specialist",
+  "seed": 42,
+  "n_splits": 5,
+  "classes": [
+    "bali",
+    "jawa",
+    "jawi",
+    "lampung",
+    "lontara",
+    "pegon",
+    "sunda"
+  ],
+  "trio_classes": [
+    "jawa",
+    "jawi",
+    "pegon"
+  ],
+  "main": {
+    "model": "torchvision_efficientnet_b0_imagenet1k_v1_full_finetune",
+    "input_size": [
+      128,
+      512
+    ],
+    "train_batch": 64,
+    "eval_batch": 256
+  },
+  "specialist": {
+    "model": "torchvision_efficientnet_b0_imagenet1k_v1_full_finetune",
+    "input_size": [
+      160,
+      960
+    ],
+    "train_batch": 32,
+    "eval_batch": 128
+  },
+  "optimization": {
+    "max_epochs": 20,
+    "early_stopping_patience": 5,
+    "warmup_epochs": 1,
+    "backbone_lr": 0.0002,
+    "head_lr": 0.0008,
+    "min_lr_ratio": 0.05,
+    "weight_decay": 0.0001,
+    "label_smoothing": 0.05,
+    "grad_clip_norm": 1.0,
+    "amp_fp16": true,
+    "class_weighting": false
+  },
+  "fusion": {
+    "type": "conditional_geometric_interpolation_preserving_trio_mass",
+    "alpha_grid": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "selected_alpha": 1.0
+  }
+}
