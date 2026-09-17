@@ -1,27 +1,40 @@
 {
-  "command": "train",
-  "root": "E:\\datsci\\infest_usk",
+  "model": "dinov3_vitl16_fullft",
+  "smoke_test": false,
+  "full_epochs": 40,
   "seed": 42,
-  "cpu": false,
-  "workers": 0,
-  "variant": "R1",
-  "all_data": true,
-  "epochs": 12,
-  "patience": 8,
-  "batch_size": 8,
-  "accumulation": 4,
-  "lr": 0.0003,
-  "weight_decay": 0.0001,
-  "labels": [
-    "bali",
-    "jawa",
-    "jawi",
-    "lampung",
-    "lontara",
-    "pegon",
-    "sunda"
+  "canvas": [
+    160,
+    640
   ],
-  "device": "cuda",
-  "train_count": 4467,
-  "validation_count": 0
+  "micro_batch": 2,
+  "effective_batch": 32,
+  "backbone_lr": 1e-05,
+  "head_lr": 0.0003,
+  "jp_cost": 1.5,
+  "class_cost": {
+    "bali": 0.9772853851318359,
+    "jawa": 0.733977735042572,
+    "jawi": 1.0440043210983276,
+    "lampung": 0.8656859397888184,
+    "lontara": 0.9681658744812012,
+    "pegon": 1.6607102155685425,
+    "sunda": 0.7501703500747681
+  },
+  "normalization": "ImageNet mean/std",
+  "strict_determinism": {
+    "seed": 42,
+    "PYTHONHASHSEED": "42",
+    "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+    "deterministic_algorithms": true,
+    "cudnn_deterministic": true,
+    "cudnn_benchmark": false,
+    "tf32_matmul": false,
+    "tf32_cudnn": false,
+    "dataloader_workers": 0
+  },
+  "torch": "2.9.1+cu128",
+  "python": "3.11.15",
+  "train_csv_sha256": "8c0b2e165141411a12558eaaf4da50e2d9618aa676c7c48051fab85fa4ced400",
+  "test_csv_sha256": "392f9b0bce5c3ada43668825a50fe159eb7310978783db0c6261a885b5262d44"
 }

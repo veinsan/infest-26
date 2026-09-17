@@ -1,0 +1,10 @@
+,test,train,test/train
+colour_tint(bg_sat>12),44.3,2.6,17.0
+colourful(>15),51.1,3.6,14.2
+not_binary(midtone>0.15),72.2,8.9,8.1
+dark_background,4.2,1.2,3.5
+black_border>=1side,7.3,1.2,6.1
+gray_occluder(flat>2%),6.6,0.4,16.5
+noisy(noise>=2),11.0,2.3,4.8
+blurry(sharp<0.6),69.2,11.9,5.8
+bg_not_white(bg_lum<225),45.2,5.2,8.7

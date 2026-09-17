@@ -1,0 +1,7 @@
+,v1,new
+adv_auc_clean_train_vs_test,0.907,0.89
+adv_auc_corrupt_train_vs_test,0.827,0.84
+F1_clean->clean,0.929,0.935
+F1_clean->corrupt,0.835,0.882
+F1_corrupt->corrupt,0.891,0.907
+F1_corrupt->clean,0.923,0.93

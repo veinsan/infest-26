@@ -1,0 +1,29 @@
+  embedded v1_train_clean: (3771, 384)
+  embedded v1_train_corrupt: (3771, 384)
+  embedded v1_test: (1220, 384)
+pipeline                               v1
+adv_auc_clean_train_vs_test      0.906525
+adv_auc_corrupt_train_vs_test    0.826743
+F1_clean->clean                  0.928971
+F1_clean->corrupt                0.834727
+F1_corrupt->corrupt              0.890755
+F1_corrupt->clean                0.922915
+  embedded new_train_clean: (3771, 384)
+  embedded new_train_corrupt: (3771, 384)
+  embedded new_test: (1220, 384)
+pipeline                              new
+adv_auc_clean_train_vs_test      0.889921
+adv_auc_corrupt_train_vs_test    0.840002
+F1_clean->clean                  0.934778
+F1_clean->corrupt                0.882117
+F1_corrupt->corrupt              0.907156
+F1_corrupt->clean                 0.93004
+
+== summary (frozen DINOv3-S + logistic regression, group 5-fold)
+pipeline                          v1    new
+adv_auc_clean_train_vs_test    0.907  0.890
+adv_auc_corrupt_train_vs_test  0.827  0.840
+F1_clean->clean                0.929  0.935
+F1_clean->corrupt              0.835  0.882
+F1_corrupt->corrupt            0.891  0.907
+F1_corrupt->clean              0.923  0.930

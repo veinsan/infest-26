@@ -1,0 +1,23 @@
+{
+  "model": "dinov3_vitl16_fullft",
+  "smoke_test": false,
+  "dataset_signature": "ba65fb413ad0bc128e6ea4d4ed35b1b44e0f4f75e934ce7850b421625789c3f1",
+  "holdout_hash": "2a50b2643399410ecfb39d2ec0fb71af884bb715aa406e07d7bad96c6d9457be",
+  "train_samples": 3016,
+  "validation_samples": 755,
+  "best_epoch": 9,
+  "holdout_macro_f1": 0.9764652301922607,
+  "f1_jawi": 0.9840255591054313,
+  "f1_pegon": 0.967741935483871,
+  "jawi_to_pegon": 1,
+  "pegon_to_jawi": 2,
+  "training_seconds": 6221.575259899997,
+  "peak_vram_gb": 5.262587547302246,
+  "parameters": 303086599,
+  "trained_parameters": 303086599,
+  "train_test_identical_hashes": 2,
+  "test_rows": 1220,
+  "inference_seconds": 29.88813530000334,
+  "test_images_per_second": 40.818873032867444,
+  "submission_sha256": "d44e893b7671f7f6755b534ecb92f783407ab1b0d1f84a8079387204bc372bb8"
+}
