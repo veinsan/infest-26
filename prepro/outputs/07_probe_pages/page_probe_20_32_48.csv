@@ -1,0 +1,7 @@
+setting,page_acc,page_macroF1
+A global view (v2),0.472,0.417
+A page_views mean,0.538,0.53
+B (+stack) page_views,0.528,0.529
+C (+stack+page tiles) page_views,0.598,0.589
+C conf-weighted,0.603,0.59
+C tiles only,0.593,0.582

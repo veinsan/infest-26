@@ -84,39 +84,11 @@ def remove_black_fill(g, dark=40, min_contact=0.3, min_solidity=0.9, max_holes=0
     return out
 
 
-def remove_dark_bars(g, dark=90, frac=0.85, max_share=0.85):
-    """Full-width/height dark bands glued to a border (large vertical shift in test: black, dark-gray or
-    black+salt-noise bars, eda/09) -> white. Detected on a 3x3 median so salt noise can't hide the bar.
-    Skipped when the rest of the image is dark too (real dark background, handled by polarity)."""
-    h, w = g.shape
-    if h < 8 or w < 8:
-        return g
-    d = ndi.median_filter(g, 3) < dark
-    def run(share):  # dark run from the border, then +2 boundary rows the 3x3 median half-lightened
-        n = int(np.argmin(np.r_[share >= frac, False]))
-        while n and n < len(share) and share[n] >= 0.5 and n < int(np.argmin(np.r_[share >= frac, False])) + 2:
-            n += 1
-        return n
-    rs, cs = d.mean(1), d.mean(0)
-    top, bot, left, right = run(rs), run(rs[::-1]), run(cs), run(cs[::-1])
-    if not (top or bot or left or right) or top + bot >= max_share * h or left + right >= max_share * w:
-        return g
-    rest = g[top:h - bot, left:w - right]
-    bands = np.concatenate([g[:top].ravel(), g[h - bot:].ravel(), g[:, :left].ravel(), g[:, w - right:].ravel()])
-    # relative, not absolute: a dark-gray bar on a gray-tinted page must still go (06 b: absolute 128 turned
-    # the whole canvas into a black block); a real dark background has rest ~ as dark as the "bar"
-    if rest.size == 0 or np.median(rest) < np.median(ndi.median_filter(g, 3)[d]) + 40:
-        return g
-    out = g.copy()
-    out[:top] = 255; out[h - bot:] = 255; out[:, :left] = 255; out[:, w - right:] = 255
-    return out
-
-
 def preprocess(rgb):
     """RGB PIL -> L PIL: gray, black fill removed, dark-ink-on-white, contrast normalised, cropped to ink.
     Fill removal runs BEFORE the polarity test: black rotation corners on a thin line can cover >50% of
     the frame and would otherwise flip the whole image to white-on-black (seen in debug_black_rotation.png)."""
-    g = remove_black_fill(remove_dark_bars(np.asarray(rgb.convert("L"))))
+    g = remove_black_fill(np.asarray(rgb.convert("L")))
     t = _otsu(g)
     if (g > t).mean() < 0.5:  # background is the majority class; if it is the dark side, invert
         g = 255 - g
@@ -224,22 +196,13 @@ def corrupt(img, rng=random):
             rw, rh = rng.uniform(.03, .1) * w, rng.uniform(.03, .1) * h + 1
             x, y = rng.uniform(0, w - rw), rng.uniform(0, h - rh)
             d.rectangle([x, y, x + rw, y + rh], fill=(0, 0, 0))
-    if rng.random() < 0.12:  # vertical shift pushing text out of frame; test bars 5-70% of height (eda/09)
-        a = np.asarray(img); k = min(h - 1, max(1, int(h * rng.uniform(0.05, 0.6))))
-        out = np.empty_like(a)
+    if rng.random() < 0.07:  # black bar from a vertical shift
+        a = np.asarray(img).copy(); k = int(h * rng.uniform(0.05, 0.25)) + 1
         if rng.random() < 0.5:
-            out[:h - k] = a[k:]; band, edge = slice(h - k, h), out[h - k - 1]
+            a[:-k] = a[k:]; a[-k:] = 0
         else:
-            out[k:] = a[:h - k]; band, edge = slice(0, k), out[k]
-        fill = rng.choice(["black", "black", "gray", "noisy", "edge"])
-        if fill == "edge":
-            out[band] = edge
-        else:
-            out[band] = 0 if fill != "gray" else rng.randint(25, 70)
-            if fill == "noisy":
-                nz = np.random.default_rng(rng.randint(0, 2**31)).random(out[band].shape[:2]) < rng.uniform(0.1, 0.35)
-                out[band][nz] = 255
-        img = Image.fromarray(out)
+            a[k:] = a[:-k]; a[:k] = 0
+        img = Image.fromarray(a)
     if rng.random() < 0.15:
         a = np.asarray(img, dtype=np.float32) + np.random.default_rng(rng.randint(0, 2**31)).normal(0, rng.uniform(5, 25), (h, w, 1))
         img = Image.fromarray(np.clip(a, 0, 255).astype(np.uint8))
@@ -247,90 +210,6 @@ def corrupt(img, rng=random):
         buf = io.BytesIO(); img.save(buf, "JPEG", quality=rng.randint(20, 75)); buf.seek(0)
         img = Image.open(buf).convert("RGB")
     return img
-
-
-# ----------------------------------------------------------------------------- page images (eda/08, eda/10)
-PAGE_MIN_H = 250  # raw height; 25% of test, glyphs rendered at 0.22 patches by the v2 letterbox
-
-
-def glyph_height(g):
-    """Median height of letter-sized connected components (upper 60% of sizes, dots excluded)."""
-    ink = g < 128
-    lab, n = ndi.label(ink)
-    if n < 3:
-        return float("nan")
-    sl = ndi.find_objects(lab)
-    hs = np.array([s[0].stop - s[0].start for s in sl]); ws = np.array([s[1].stop - s[1].start for s in sl])
-    area = np.bincount(lab.ravel())[1:]
-    ok = (hs >= 3) & (area >= 8) & (ws < 8 * hs + 10) & (hs <= max(0.25 * g.shape[0], 8))
-    if ok.sum() < 3:
-        return float("nan")
-    hs = hs[ok]
-    return float(np.median(hs[hs >= np.percentile(hs, 40)]))
-
-
-def _zoom(img, z):
-    z = float(np.clip(z, 0.15, 4.0))
-    return img.resize((max(1, round(img.width * z)), max(1, round(img.height * z))),
-                      Image.Resampling.BICUBIC if z > 1 else Image.Resampling.LANCZOS)
-
-
-def _paste_tile(g, y, x, H, W):
-    t = np.full((H, W), 255, np.uint8)
-    c = g[y:y + H, x:x + W]; t[:c.shape[0], :c.shape[1]] = c
-    return t
-
-
-def page_views(pp, H=160, W=640, targets=(24, 44), k=6, ink_lo=0.03, ink_hi=0.45):
-    """Eval views for a page: the global letterbox + up to k ink-rich 160x640 tiles per glyph scale.
-    Two scales hedge a wrong glyph-height estimate (carved / textured pages)."""
-    views = to_canvas(pp, H, W)
-    gh = glyph_height(np.asarray(pp))
-    if not np.isfinite(gh):
-        return views
-    for tgt in targets:
-        g = np.asarray(_zoom(pp, tgt / gh)); h, w = g.shape
-        if h <= H and w <= W:
-            continue
-        cands = []
-        for y in range(0, max(1, h - H // 2), H // 2):
-            for x in range(0, max(1, w - W // 2), W // 2):
-                t = _paste_tile(g, y, x, H, W); f = (t < 128).mean()
-                if ink_lo <= f <= ink_hi:
-                    cands.append((abs(f - 0.15), y, x, t))
-        cands.sort(key=lambda c: c[0])
-        views += [Image.fromarray(c[3]) for c in cands[:k]]
-    return views
-
-
-def train_page_view(pp, rng=random, H=160, W=640, ink_lo=0.03, ink_hi=0.45):
-    """Random page view: 30% global letterbox, else a random ink-rich tile at a random glyph scale 18-56px."""
-    gh = glyph_height(np.asarray(pp))
-    if rng.random() < 0.3 or not np.isfinite(gh):
-        return to_canvas(pp, H, W, train=True, rng=rng)[0]
-    g = np.asarray(_zoom(pp, rng.uniform(18, 56) / gh)); h, w = g.shape
-    for _ in range(8):
-        t = _paste_tile(g, rng.randint(0, max(0, h - H)), rng.randint(0, max(0, w - W)), H, W)
-        if ink_lo <= (t < 128).mean() <= ink_hi:
-            return Image.fromarray(t)
-    return to_canvas(pp, H, W, train=True, rng=rng)[0]
-
-
-def stack_view(pps, rng=random, H=160, W=640):
-    """Synthetic page tile from 2-4 preprocessed LINE crops of one class: small line height (glyph ~15-40px),
-    stacked like rows of a page. Gives the 199 train pages ~3k same-scale companions."""
-    canvas = np.full((H, W), 255, np.uint8)
-    lh = rng.randint(40, 80); y = rng.randint(0, 12)
-    for pp in pps:
-        if y + lh > H:
-            break
-        g = np.asarray(pp.resize((max(1, round(pp.width * lh / pp.height)), lh), Image.Resampling.LANCZOS))
-        x0 = rng.randint(0, max(0, g.shape[1] - W))
-        seg = g[:, x0:x0 + W]
-        xo = rng.randint(0, W - seg.shape[1])
-        canvas[y:y + lh, xo:xo + seg.shape[1]] = np.minimum(canvas[y:y + lh, xo:xo + seg.shape[1]], seg)
-        y += lh + rng.randint(0, 10)
-    return Image.fromarray(canvas)
 
 
 def train_view(path, rng=random, H=160, W=640):
@@ -354,20 +233,6 @@ if __name__ == "__main__":  # self-check on synthetic images
     assert crop_to_ink(page).shape == page.shape, "sparse page + black dash must not collapse to the dash"
     views = to_canvas(Image.new("L", (3000, 80), 255), train=False)
     assert all(v.size == (640, 160) for v in views) and len(views) > 1
-    bar = np.full((60, 400), 255, np.uint8); bar[20:30, 50:350] = 0; bar[-25:] = 0
-    bar[-25:][np.random.default_rng(0).random((25, 400)) < .25] = 255  # noisy bar
-    nb = remove_dark_bars(bar)
-    assert (nb[-25:] == 255).all() and (nb[20:30, 50:350] == 0).all(), "noisy bar removed, text kept"
-    dark = 255 - np.asarray(img.convert("L")); assert (remove_dark_bars(dark) == dark).all(), "dark background untouched"
-    tinted = np.full((60, 400), 140, np.uint8); tinted[25:35, 50:350] = 20; tinted[:18] = 45  # gray bar on gray page
-    assert (remove_dark_bars(tinted)[:18] == 255).all() and (remove_dark_bars(tinted)[25:35, 50:350] == 20).all()
-    pg = Image.new("L", (900, 700), 255); dpg = ImageDraw.Draw(pg)
-    for yy in range(20, 680, 30):
-        dpg.text((20, yy), "lorem ipsum dolor sit amet consectetur adipiscing elit sed do", fill=0)
-    assert 5 <= glyph_height(np.asarray(pg)) <= 15
-    pv = page_views(pg); assert len(pv) > 1 and all(v.size == (640, 160) for v in pv)
-    assert train_page_view(pg, random.Random(1)).size == (640, 160)
-    assert stack_view([p, p, p], random.Random(2)).size == (640, 160)
     r = random.Random(0)
     for _ in range(50):
         c = corrupt(img, r); assert c.mode == "RGB"

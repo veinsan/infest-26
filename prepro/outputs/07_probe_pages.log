@@ -1,0 +1,18 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+  built train_page_views {'emb': (2382, 384), 'owner': (2382,), 'is_global': (2382,)}
+  built stack_views {'emb': (1400, 384), 'y': (1400,), 'fold': (1400,)}
+  fold 0 done
+  fold 1 done
+  fold 2 done
+  fold 3 done
+  fold 4 done
+
+== train pages (n=199), frozen DINOv3-S probe, group 5-fold
+                         setting  page_acc  page_macroF1
+              A global view (v2)     0.472         0.417
+               A page_views mean     0.543         0.532
+           B (+stack) page_views     0.553         0.551
+C (+stack+page tiles) page_views     0.588         0.575
+                 C conf-weighted     0.603         0.589
+                    C tiles only     0.593         0.586
+   line accuracy (clean, fold-k): probe A 0.9809 | probe C 0.9778

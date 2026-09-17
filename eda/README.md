@@ -42,3 +42,22 @@ Catatan: evaluasi "corrupt" memakai `corrupt()` sendiri (sirkular) — angka ini
 - train: `train_view(path, rng)` = `corrupt` → `preprocess` → random window 160×640
 - eval/test: `eval_views(path)` = `preprocess` → tile 160×640 (rata-rata logits antar tile)
 - CV: `prepro/outputs/folds.csv` (fold, weight). Near-copy test: `prepro/outputs/test_train_twins.csv`.
+
+---
+
+# Round 2 — setelah v2 (LB 0.91514)
+
+| # | Temuan (angka) | Script | Tindakan |
+|---|---|---|---|
+| 8 | Content type dari ukuran raw: **page** (h≥250) train 5.3% vs **test 24.6%**. OOF v2 per type: line .992, block .973, glyph .979, **page .744**. OOF di-reweight ke mix test = **0.930** → 75% gap ke LB = komposisi | eda/08 | fokus page; epoch dipilih dengan F1 reweighted |
+| 9 | Line test low-conf 7% vs OOF 0.7%: 52% punya bar (shift vertikal 5–70%, hitam/abu/noisy) | eda/09 | `remove_dark_bars` + korupsi shift diperbesar |
+| 10 | Glyph page setelah canvas v2 = **3.5px (0.22 patch)** vs line 57px. Page glyph <8px acc .684, sisanya .972 | eda/10 | `page_views` multi-skala (24/44px) + `train_page_view` + `stack_view` |
+| 11 | Dup test-test inkonsisten: 2 grup terbesar ternyata false positive (bar). EM prior test: pegon ~23%, jawi ~9% | eda/11 | tidak di-average; `submission_prior.csv` sebagai eksperimen |
+
+| Percobaan prepro round 2 | Hasil nyata | Perbaikan |
+|---|---|---|
+| `remove_dark_bars` absolut (<128) | bar abu di page tint abu tidak terhapus → canvas **balok hitam penuh** | kontras relatif bar vs sisa (+40) → degenerate 0/1500 |
+| bar removal di train bersih | 2.3% kehilangan >2% tinta | dicek visual: garis bantu/underline/bingkai, teks utuh → diterima (malah buang shortcut sumber) |
+| page views (probe frozen, 199 page, group CV) | acc .472 → .543 (views) → .553 (+stack) → .588 (+page tiles) → **.603** (conf-weighted); line .981 → .978 | dipakai |
+| skala tile (24,44) vs (32,56) vs (20,32,48) | .603 / .598 / .603 — dalam noise | (24,44) paling murah |
+| kalibrasi korupsi line | domain AUC .728 → .717; line .706 → .681 | dipakai |

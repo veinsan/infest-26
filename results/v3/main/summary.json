@@ -1,0 +1,18 @@
+{
+  "run": "main",
+  "folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "oof_f1_clean": 0.9809126097315046,
+  "oof_f1_testlike": 0.9740309677000601,
+  "oof_f1_testlike_reweighted_LB_proxy": 0.9525011672428253,
+  "v2_reference": {
+    "oof_f1_corrupt": 0.9735,
+    "reweighted": 0.9299,
+    "public_lb": 0.91514
+  }
+}

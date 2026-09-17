@@ -1,0 +1,5 @@
+ctype,n,acc_clean,acc_testlike,v2_acc_corrupt
+line,2832,0.9944,0.9883,0.992
+block,409,0.9731,0.9584,0.973
+glyph,331,0.9698,0.9637,0.979
+page,199,0.8643,0.8643,0.744
