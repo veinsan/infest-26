@@ -96,3 +96,23 @@ Catatan: evaluasi "corrupt" memakai `corrupt()` sendiri (sirkular) — angka ini
 | page view mentah gray tanpa stretch | kontras poster kuning/manuskrip gelap jadi rendah secara visual | dibiarkan: probe gray mentah ≥ preprocess (.688 vs .665) |
 
 **Keputusan v5:** line/block/glyph = v2 persis; page (h≥250) = gray letterbox 640×640 + augmentasi ringan, micro-batch homogen (4 page = 1600 token ≈ memori 16 line). Submission B (hybrid: non-page v2, page v5) mengisolasi efek page di LB.
+
+---
+
+# Round 5 — setelah hybrid B (LB 0.91820, +0.00306 dari v2)
+
+| # | Temuan (angka) | Script | Arti → tindakan |
+|---|---|---|---|
+| 25 | LB forensics: B benar di **±50%** dari 37 page yang ia ubah (q .4–.6). 36 perubahan v3 yang TIDAK sama dengan B (18 line, 17 page) benar hanya **0–20%**. Satu baris diperbaiki ≈ **+0.0008** | eda/25 | 0.92 = net +2–3 baris. Kerugian v3 dulu terutama dari perubahan line jawi↔pegon/lontara→jawi |
+| 26 | Perkiraan sisa error B: page ±44, **line ±40**, block ±3, glyph ±2. Pasangan ragu: jawi/pegon 38, bali/jawa 18, jawi/lontara (line) 16, jawa/sunda 14 | eda/26 | line sama pentingnya dengan page |
+| 27 | Line conf<.6: panjang (w 881, aspect setelah preprocess 17.7 vs 4.1), bar di 35% (vs 1% line yakin) | eda/27 | |
+| 28 | **Bug v2**: pada line dengan tile nyaris kosong P(conf<.6)=**71%** vs 5.5%. Penyebab: Otsu memisahkan bar vs sisanya → teks abu dianggap latar → stretch jadi putih → crop ke bar | eda/28 | perbaiki statistik stretch |
+| 29 | Blend v2+v5 di page: semua bobot < v5 murni (OOF .864) | eda/29 | page: variance reduction, bukan blend |
+
+| Percobaan prepro round 5 | Hasil nyata | Perbaikan |
+|---|---|---|
+| metrik "text survival" v1 (median lokal 15px) | train bersih .04 → metrik rusak (median gelap di dalam goresan tebal) | latar lokal = max-filter 31px |
+| metrik v2 (polaritas "sisi minoritas") | train .17 → rusak untuk teks tebal | polaritas = mayoritas piksel non-fill (seperti pipeline) → train **.961** |
+| r2 = + `remove_dark_bars` | 50 line paling ragu: terhapus 22% → 16% | kurang |
+| **v6 = r2 + statistik stretch dari piksel konten** | terhapus 22% → **10%**; train (.961) & block/glyph tidak berubah; train terkorupsi .75 ≈ test .77 (terkalibrasi) | dipakai; efek samping: segitiga abu lebih gelap (sama di train) |
+| cakupan | v6 mengubah 95 baris test non-page (31% conf<.6 vs 3% baris lain); 0.9% train bersih | submission C = B + v6 hanya di 95 baris itu |
