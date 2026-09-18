@@ -61,3 +61,38 @@ Catatan: evaluasi "corrupt" memakai `corrupt()` sendiri (sirkular) — angka ini
 | page views (probe frozen, 199 page, group CV) | acc .472 → .543 (views) → .553 (+stack) → .588 (+page tiles) → **.603** (conf-weighted); line .981 → .978 | dipakai |
 | skala tile (24,44) vs (32,56) vs (20,32,48) | .603 / .598 / .603 — dalam noise | (24,44) paling murah |
 | kalibrasi korupsi line | domain AUC .728 → .717; line .706 → .681 | dipakai |
+
+---
+
+# Round 3 — setelah v3 (LB 0.89077, turun dari v2 0.91514)
+
+| # | Temuan (angka) | Script | Arti |
+|---|---|---|---|
+| 12 | v3 beda dari v2 hanya 59 baris (40 page). Simulasi macro-F1: v3 benar di **±20–30%** baris yang ia ubah (v2 vs v1: ±80%). 25/40 page berubah = v3 sendirian melawan v1+v2 | eda/12 | tile page merusak prediksi page test |
+| 13 | Test page mirip train page sama seperti antar train page (median sim .783 vs .775); 1-NN page cuma 45%. Kasus jelas: "فتوى جهاد" (pegon, twin sim .94) v2 benar, v3 → jawi; naskah Arab tulisan tangan v3 → jawi/jawa | eda/13 | label mengikuti **genre/sumber** halaman, tile membaca huruf lokal |
+| 14 | Round 2 membandingkan v2 page **corrupt** (.744) vs v3 page **clean** (.864). Apple-to-apple: v2 .809 → v3 .864 (+.055, CI +.005..+.111), bias seleksi epoch ±.05, noise val page ±.03/fold. Proxy dikoreksi: v2 .945 vs v3 .952 → **CV tidak bisa membedakan**, LB bisa | eda/14 | kesalahan metodologi gua di round 2 |
+| 15 | Prior test (EM terkalibrasi & BBSE sepakat): pegon ~18–19%, lampung ~19%, jawi ~12% (train 8/13/21). Tapi v2 sudah memprediksi pegon 17% → koreksi cuma ubah 28–37 baris | eda/15 | prior shift nyata tapi sudah ditangkap model |
+| — | Block jawi di train = angka Arab cetak / kata cetak / Latin; block pegon = potongan tulisan tangan miring. Block test pred pegon = gaya yang sama | eda/15 fig | kelas didefinisikan sumber |
+| 16 | Hipotesis source-leak di CV page: ditolak (gain v3 justru di page tanpa "saudara") | eda/16 | |
+| 17–20 | Silver label dari twin train: page presisi .41–.54 (tak dipakai); non-page presisi clean .985 tapi **dengan query terkorupsi hanya .855** (twin tertipu tekstur noise). Aturan presisi .982 (sim≥.85, margin≥.1) → 129 gambar, **semua model 100%** | eda/17–20 | validasi tanpa label mentok: yang presisi = gampang |
+
+**Kesimpulan round 3:** preprocessing v2 (view global) tetap yang terbaik yang terbukti di LB. Perubahan v3 yang bisa diukur (page tiles) merugikan; perubahan line v3 netral (6/6/6 pola v1). Tidak ada opsi tanpa-training (prior EM/BBSE, ensemble v2+v3, hybrid) yang mengalahkan v2 di silver. Validasi offline untuk page tidak ada; keputusan page harus lewat LB, satu faktor per submission.
+
+---
+
+# Round 4 — page & jawi/pegon (setelah v4 tidak disubmit)
+
+| # | Temuan (angka) | Script | Arti → tindakan |
+|---|---|---|---|
+| 21 | Page train (199) vs test (300): median ukuran 750×595 vs 772×672, JPEG **79% vs 80%**, saturasi 17.7 vs 20.3 → sumber sama (web), train hanya kurang sampel page. Page pegon = foto manuskrip tua; page jawi = cetakan (koran, papan jalan, kamus). Di canvas v2 page hanya mengisi ~1/4 lebar | eda/21 | masalahnya cara melihat page, bukan domain |
+| 22 | Probe DINOv3-S beku, page train held-out: v2-view **.60**, 224² .60, 448² gray .69, 448² RGB .68, 448² + preprocess v2 .67, **640² gray .73** (F1 .52 → .69); block .91 → .94 | eda/22 | **resolusi = tuas utama**; warna tidak membantu; crop/stretch v2 sedikit merugikan page |
+| 23 | Page test **bersih**: ketajaman 2.68 vs train 2.92 (line test 2.76 vs train 5.66), bar 13.7% vs 20.1%, tidak ada segitiga/dash di crop resolusi penuh | eda/23 | page tidak butuh `corrupt()`; cukup augmentasi foto ringan |
+| 24 | 640² vs v2-view: perbaiki 26 page, rusak 8. Recall jawi .13→.39, lontara .70→.90, lampung .83→.93, sunda .06→.25. Di test beda dari v2 di 83/300 page (jawi→pegon 15, jawa↔bali 20) | eda/24 | probe S lemah untuk dipakai langsung; perlu fine-tune L dengan view ini |
+
+| Percobaan prepro round 4 | Hasil nyata | Perbaikan |
+|---|---|---|
+| augmentasi page v1 (blur p.5, rotate-expand p.4, gamma .75–1.33) | domain AUC statistik canvas train-aug vs test **.67** | ternyata sebagian besar artefak ukur: 3 salinan aug/gambar + CV tidak di-group → salinan dikenali antar fold |
+| ukur ulang (1 salinan/gambar, 5 seed) + augmentasi dikalibrasi (crop 85–100%, rotasi ±5° p.25 tanpa expand, gamma .85–1.18, low-res p.15, JPEG q50–95) | AUC **.475** vs clean .466, median stats cocok (edge 4.67 vs test 4.81) | dipakai (`prepro/page_view.py`, cek `prepro/08`) |
+| page view mentah gray tanpa stretch | kontras poster kuning/manuskrip gelap jadi rendah secara visual | dibiarkan: probe gray mentah ≥ preprocess (.688 vs .665) |
+
+**Keputusan v5:** line/block/glyph = v2 persis; page (h≥250) = gray letterbox 640×640 + augmentasi ringan, micro-batch homogen (4 page = 1600 token ≈ memori 16 line). Submission B (hybrid: non-page v2, page v5) mengisolasi efek page di LB.

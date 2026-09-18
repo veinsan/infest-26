@@ -1,0 +1,124 @@
+{
+  "SMOKE_TEST": false,
+  "RUN_NAME": "main",
+  "SEED": 42,
+  "MODEL_NAME": "vit_large_patch16_dinov3.lvd1689m",
+  "H": 160,
+  "W": 640,
+  "EPOCHS": 12,
+  "WARMUP_EPOCHS": 1,
+  "PATIENCE": 4,
+  "MICRO_BATCH": 16,
+  "ACCUM": 2,
+  "EVAL_BATCH": 64,
+  "GRAD_CKPT": false,
+  "BASE_LR": 4e-05,
+  "HEAD_LR": 0.0003,
+  "LAYER_DECAY": 0.85,
+  "WEIGHT_DECAY": 0.05,
+  "LABEL_SMOOTHING": 0.1,
+  "NONLINE_BOOST": 1.5,
+  "FOLDS": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "NUM_WORKERS": 14,
+  "PAGE_S": 640,
+  "PAGE_MB": 4,
+  "PAGE_P": 0.2,
+  "PAGE_EVAL_BATCH": 16,
+  "RAW_MAX_SIDE": 1600,
+  "USE_TWINS": true,
+  "SAVE_WEIGHTS": false,
+  "LABELS": [
+    "bali",
+    "jawa",
+    "jawi",
+    "lampung",
+    "lontara",
+    "pegon",
+    "sunda"
+  ],
+  "PARCHMENT": [
+    [
+      236,
+      224,
+      196
+    ],
+    [
+      222,
+      205,
+      170
+    ],
+    [
+      245,
+      238,
+      214
+    ],
+    [
+      210,
+      196,
+      160
+    ],
+    [
+      196,
+      186,
+      160
+    ],
+    [
+      250,
+      246,
+      230
+    ],
+    [
+      170,
+      170,
+      170
+    ],
+    [
+      230,
+      230,
+      230
+    ]
+  ],
+  "INKS": [
+    [
+      20,
+      20,
+      20
+    ],
+    [
+      90,
+      20,
+      30
+    ],
+    [
+      30,
+      70,
+      40
+    ],
+    [
+      40,
+      40,
+      90
+    ],
+    [
+      70,
+      50,
+      30
+    ],
+    [
+      60,
+      30,
+      80
+    ]
+  ],
+  "PAGE_MIN_H": 250,
+  "torch": "2.11.0+cu128",
+  "timm": "1.0.29",
+  "python": "3.12.14",
+  "gpu": "NVIDIA GeForce RTX 5090"
+}

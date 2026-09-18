@@ -1,0 +1,4 @@
+members,f1_clean,f1_corrupt,f1_testlike,page_acc_clean,line_acc_corrupt
+seed7,0.9806,0.9741,0.9759,0.7889,0.9919
+seed2026,0.9816,0.9728,0.9757,0.7839,0.9926
+seed7 + seed2026,0.9809,0.9739,0.9767,0.794,0.9919
